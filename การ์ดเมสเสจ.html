@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>สมุดเบอร์การ์ดเมสเสจ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --line-green: #06C755;
+    --line-green-dark: #04a845;
+    --line-blue: #3B82F6;
+    --ink: #1A1D21;
+    --ink-soft: #5C6066;
+    --mist: #9AA0A6;
+    --canvas: #EFF3F0;
+    --card: #FFFFFF;
+    --hairline: #E6EAE7;
+    --chip-bg: #EAFBEF;
+    --chip-blue-bg: #EBF2FE;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body { padding-bottom: 64px; }
+
+  /* ---------- Chat-style header ---------- */
+  .oa-header {
+    background: linear-gradient(135deg, var(--line-green) 0%, var(--line-green-dark) 100%);
+    color: white;
+    padding: 28px 20px 72px;
+    position: relative;
+    overflow: hidden;
+  }
+  .oa-header::after {
+    content: "";
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+  }
+  .oa-header::before {
+    content: "";
+    position: absolute;
+    left: -40px; bottom: -80px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .oa-top {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    z-index: 1;
+  }
+  .oa-icon {
+    width: 52px; height: 52px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.18);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+  .oa-name { font-family: 'Prompt', sans-serif; font-weight: 600; font-size: 1.05rem; line-height: 1.3; }
+  .oa-id { font-size: 0.8rem; opacity: 0.85; margin-top: 2px; }
+  .oa-headline {
+    max-width: 1180px;
+    margin: 26px auto 0;
+    position: relative;
+    z-index: 1;
+  }
+  .oa-headline h1 {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.5rem, 3.4vw, 2.1rem);
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  .oa-headline p {
+    margin: 0;
+    max-width: 640px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    opacity: 0.92;
+  }
+
+  /* ---------- Stat strip, floating over header ---------- */
+  .stat-strip {
+    max-width: 1180px;
+    margin: -44px auto 28px;
+    padding: 0 20px;
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .stat-tile {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 16px 14px;
+    box-shadow: 0 6px 18px rgba(16, 45, 30, 0.08);
+    text-align: center;
+  }
+  .stat-tile .n {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--line-green-dark);
+    line-height: 1.1;
+  }
+  .stat-tile .l {
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  /* ---------- Controls ---------- */
+  .controls {
+    max-width: 1180px;
+    margin: 0 auto 20px;
+    padding: 0 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .search-wrap {
+    flex: 1;
+    min-width: 220px;
+    position: relative;
+  }
+  .search-wrap svg {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--mist);
+  }
+  #searchBox {
+    width: 100%;
+    padding: 12px 14px 12px 40px;
+    border-radius: 12px;
+    border: 1px solid var(--hairline);
+    background: var(--card);
+    font-family: inherit;
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+  #searchBox:focus { outline: 2px solid var(--line-green); outline-offset: 1px; }
+  .filter-pills { display: flex; gap: 8px; }
+  .filter-pill {
+    padding: 11px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--hairline);
+    background: var(--card);
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .filter-pill.active {
+    background: var(--line-green);
+    border-color: var(--line-green);
+    color: white;
+    font-weight: 500;
+  }
+
+  /* ---------- Card grid ---------- */
+  .grid {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 14px;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 20px 16px 0;
+    box-shadow: 0 2px 8px rgba(16,45,30,0.06);
+    border: 1px solid var(--hairline);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    transition: box-shadow .15s ease, transform .15s ease;
+  }
+  .card:hover { box-shadow: 0 10px 24px rgba(16,45,30,0.12); transform: translateY(-2px); }
+
+  .avatar {
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+  }
+  .card .nm {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 0 0 3px;
+  }
+  .card .alias {
+    font-size: 0.72rem;
+    color: var(--mist);
+    margin: -2px 0 6px;
+  }
+  .card .phone-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--chip-bg);
+    color: var(--line-green-dark);
+    font-weight: 600;
+    font-size: 0.82rem;
+    padding: 4px 11px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .card .fullname {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    line-height: 1.45;
+    min-height: 2.2em;
+    margin-bottom: 14px;
+  }
+  .card .fullname.missing { color: #C7CBCE; font-style: italic; }
+
+  .actions {
+    width: calc(100% + 32px);
+    margin-left: -16px;
+    border-top: 1px solid var(--hairline);
+    display: flex;
+  }
+  .act-btn {
+    flex: 1;
+    border: none;
+    background: none;
+    font-family: inherit;
+    padding: 11px 6px;
+    font-size: 0.74rem;
+    color: var(--line-green-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    position: relative;
+  }
+  .act-btn + .act-btn { border-left: 1px solid var(--hairline); }
+  .act-btn.email { color: var(--line-blue); }
+  .act-btn:active { background: #F3F7F4; }
+  .act-btn svg { width: 15px; height: 15px; }
+  .act-btn .toast {
+    position: absolute;
+    top: -28px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: white;
+    font-size: 0.68rem;
+    padding: 4px 9px;
+    border-radius: 7px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease;
+  }
+  .act-btn .toast.show { opacity: 1; }
+
+  .no-email-pad { height: 1px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--mist);
+    font-size: 0.9rem;
+    grid-column: 1 / -1;
+  }
+
+  footer {
+    max-width: 1180px;
+    margin: 36px auto 0;
+    padding: 0 20px;
+    font-size: 0.78rem;
+    color: var(--mist);
+    text-align: center;
+  }
+
+  @media (max-width: 700px) {
+    .stat-strip { grid-template-columns: repeat(2, 1fr); }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .card { padding: 16px 10px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="oa-header">
+  <div class="oa-top">
+    <div class="oa-icon">👷</div>
+    <div>
+      <div class="oa-name">ทีมช่าง First Techno</div>
+      <div class="oa-id">@541xwzqz &middot; LINE Official Account</div>
+    </div>
+  </div>
+  <div class="oa-headline">
+    <h1>สมุดเบอร์การ์ดเมสเสจ</h1>
+    <p>รวมนามบัตรดิจิทัลของทีมงานทั้งหมด ดึงมาจากการ์ดเมสเสจหน้า 1–6 แตะปุ่มด้านล่างการ์ดเพื่อคัดลอกเบอร์โทรหรืออีเมลได้ทันที</p>
+  </div>
+</header>
+
+<div class="stat-strip">
+  <div class="stat-tile"><div class="n">54</div><div class="l">การ์ดทั้งหมด</div></div>
+  <div class="stat-tile"><div class="n">19</div><div class="l">มีอีเมล</div></div>
+  <div class="stat-tile"><div class="n">48</div><div class="l">มีชื่อเต็ม</div></div>
+  <div class="stat-tile"><div class="n">1</div><div class="l">บัญชี LINE OA</div></div>
+</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" id="searchBox" placeholder="ค้นหาชื่อ เบอร์โทร หรืออีเมล..." oninput="render()">
+  </div>
+  <div class="filter-pills">
+    <button class="filter-pill active" data-f="all" onclick="setFilter('all', this)">ทั้งหมด</button>
+    <button class="filter-pill" data-f="email" onclick="setFilter('email', this)">มีอีเมล</button>
+    <button class="filter-pill" data-f="noname" onclick="setFilter('noname', this)">ไม่มีชื่อเต็ม</button>
+  </div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<footer>ข้อมูลจาก LINE Official Account Manager &middot; manager.line.biz/account/@541xwzqz/cardtypemessage &middot; อัปเดต 18 ต.ค. 2569</footer>
+
+<script>
+// ชื่อในวงเล็บ = ชื่อที่แสดงในหน้ารายชื่อ (ต่างจากชื่อจริงบนการ์ด)
+const people = [
+  {id:"22003289", name:"เบิร์ด", phone:"064-505-4949", full:"นายธีระโชติ แสงพระจันทร์", email:""},
+  {id:"22003226", name:"อีฟ", phone:"085-759-1538", full:"นายนัฐพงษ์ สันตะลับ", email:""},
+  {id:"22002970", name:"เบน", phone:"064-771-9342", full:"นายพงษ์พันธ์ พันเถาว์", email:""},
+  {id:"22002926", name:"อาร์ม", phone:"061-060-0808", full:"นายฐานิฏฐ์ ไชยรัตน์", email:"thanit.c@first-techno.co.th"},
+  {id:"22002905", name:"นุ่ม", phone:"098-069-0609", full:"น.ส.นิศา อุทัยรัมย์", email:""},
+  {id:"22002875", name:"นงค์ลักษณ์", alias:"พี่ลัก", phone:"098-103-9949", full:"น.ส.นงค์ลักษณ์ ชิณศรี", email:""},
+  {id:"22002851", name:"หมู", phone:"099-179-0525", full:"นายธรรพ์ รองเมือง", email:""},
+  {id:"22002528", name:"TOK", phone:"064-493-7069", full:"น.ส.ฐิตาพร จบแล้ว", email:"thitaporn.j@first-techno.co.th"},
+  {id:"22002437", name:"โจ เสก", alias:"เสกสรร", phone:"098-879-1260", full:"นายเสกสรร แสงจันทร์", email:"seksan.sang@first-tecno.co.th"},
+  {id:"20028852", name:"แป๊บซี่", phone:"063-814-3575", full:"นายวัชรพงษ์ ขุนพรม", email:""},
+  {id:"20028816", name:"แอน", phone:"098-553-6440", full:"นายจรัสพงศ์ พรหมพินิจ", email:""},
+  {id:"20028782", name:"โอ๋", phone:"081-982-5979", full:"นายคมกริช รัตนากรณ์", email:""},
+  {id:"20028764", name:"ไนท์", phone:"065-964-1614", full:"นายศรราม จันทร์ชม", email:""},
+  {id:"20028752", name:"นุ", phone:"085-426-9711", full:"นายวิษณุ ประกอบแสง", email:""},
+  {id:"20028730", name:"เอ็ม", phone:"065-645-6490", full:"นายพีรพงษ์ ฟักแก้ว", email:""},
+  {id:"20028712", name:"ต้น", phone:"091-729-9930", full:"นายปริญญา อยู่บ้านคลอง", email:""},
+  {id:"20028697", name:"อั๋น", phone:"080-227-1166", full:"นาย ธนกร ระวังการณ์", email:""},
+  {id:"20028684", name:"แบงค์", phone:"097-141-1636", full:"นายนครินทร์ วรรณศรี", email:""},
+  {id:"20028648", name:"ฮอท", phone:"080-413-5690", full:"นายนราธิป อังกูรพาณิชญกิจ", email:""},
+  {id:"19184108", name:"เต้ย", phone:"097-0613-977", full:"นา่ยศักดิ์ จันทร์แสง", email:""},
+  {id:"18881428", name:"ตั้ม สโตร์", alias:"ตั้มโตร์", phone:"098-197-9587", full:"ธนวัฒน์ มูลนาเครือ", email:""},
+  {id:"18214099", name:"พี่แอน", alias:"แอน", phone:"098-553-6440", full:"นายจรัสพงศ์ พรหมพินิจ", email:""},
+  {id:"18214063", name:"โบ๊ท", phone:"087-651-1303", full:"นายสุเมธ พิมพ์ปรุ", email:""},
+  {id:"18214038", name:"คุณอู๋", alias:"อู๋", phone:"097-010-1434", full:"นายกุลฑล สินสกุล", email:""},
+  {id:"18213562", name:"พล", alias:"ขจรยศ", phone:"097-006-9606", full:"นายขจรยศ เกิดพิทักษ์", email:"khachonyod.k@first-techno.co.th"},
+  {id:"15832732", name:"หนึ่ง", alias:"บดินทร์", phone:"080-072-2883", full:"นายบดินทร์ เพชรกูล", email:""},
+  {id:"15774763", name:"บอย", phone:"098-760-5885", full:"นายธีรภัทร วันนาพ่อ", email:""},
+  {id:"15774748", name:"ดิว", phone:"095-949-1733", full:"นายกันอริ เพ็งอุบล", email:""},
+  {id:"15774707", name:"ก็อฟ", alias:"GOF", phone:"090-992-5146", full:"นายเหมรัช เพิ่มสุข", email:""},
+  {id:"15774684", name:"ตาต้า", phone:"086-407-5668", full:"น.ส.ดวงตา ยงยุทธ", email:"duangta.y@first-techno.co.th"},
+  {id:"15774657", name:"หนึ่ง", phone:"084-037-1971", full:"นายวรินทร์ภวิศ ธุวชิตปริยฉัตร", email:"warinphawis.t@first-techno.co.th"},
+  {id:"15764928", name:"ฟาง", phone:"096-124-8705", full:"น.ส.กนกพิชญ์ ทิพย์ศักดิ์", email:"kanokpich.t@first-techno.co.th"},
+  {id:"10058938", name:"กุ้ง", phone:"086-912-4793", full:"นายจักรกฤษ เหล่ารบ", email:"jukkrit.l@first-techno.co.th"},
+  {id:"10058484", name:"เอก", phone:"095-474-9345", full:"", email:""},
+  {id:"10058465", name:"อาร์ต", phone:"092-494-0449", full:"", email:""},
+  {id:"10058452", name:"ออฟ", phone:"091-853-1210", full:"นายปิยะพล เหมหา", email:"piyaphon.h@first-techno.co.th"},
+  {id:"10058437", name:"ศักดิ์", phone:"087-217-5432", full:"นายสมศักดิ์ ปูลา", email:""},
+  {id:"10058409", name:"วิน", phone:"085-982-2196", full:"", email:""},
+  {id:"10058401", name:"เรียว", phone:"082-215-6521", full:"", email:""},
+  {id:"10058381", name:"ยืนยังเซ", phone:"090-971-9046", full:"นายอดิศร สายทอง", email:"adisorn.s@first-techno.co.th"},
+  {id:"10058347", name:"มิ๊ว", phone:"099-298-6777", full:"นายวิชาวิมล ซอละศรี", email:""},
+  {id:"10058336", name:"พิเชษฐ์", phone:"081-140-1914", full:"นายพิเชษฐ์ คำลอย", email:"pichet.k@first-techno.co.th"},
+  {id:"10058306", name:"ป๊อป", phone:"083-699-6235", full:"นายปฏิภาณ ปิงคะยอม", email:"patipan.pi@first-techno.co.th"},
+  {id:"10058286", name:"นิก", phone:"093-374-2686", full:"นายรัฐพงษ์ โคตรพัฒน์", email:""},
+  {id:"10058262", name:"จิรนันท์", alias:"นันท์", phone:"083-017-6308", full:"นายจิรนันท์ ศรีเมือง", email:""},
+  {id:"10058228", name:"ถาวร", phone:"063-074-5695", full:"นายถาวร จาวเจริญทรัพย์", email:"thaworn.j@first-techno.co.th"},
+  {id:"10058139", name:"เต้", phone:"086-366-2295", full:"นายทวีป นิตย์นรา", email:"taweep.n@first-techno.co.th"},
+  {id:"10058058", name:"ตู่", phone:"092-904-4379", full:"นายชาญวิทย์ ชูริบัติ", email:"chanwit.c@first-techno.co.th"},
+  {id:"10058033", name:"ตุ่ม", phone:"088-253-5918", full:"นายดิศรา ทวีราช", email:"ditsara.t@first-techno.co.th"},
+  {id:"10058018", name:"ต้า", phone:"094-391-6541", full:"", email:""},
+  {id:"10057721", name:"ตั้ม", phone:"084-081-7532", full:"", email:""},
+  {id:"10057669", name:"เกมส์", phone:"082-789-2389", full:"นายยุทธพิชัย ขวัญครอง", email:"yutthaphichai.k@first-techno.co.th"},
+  {id:"10057271", name:"กอล์ฟ", phone:"064-569-2642", full:"นายจักรกฤษณ์ ดลผาด", email:"jakkrit.d@first-techno.co.th"},
+  {id:"10055056", name:"คุณบอล วรายุทธ", alias:"บอล", phone:"062-783-2299", full:"นายวรายุทธ พวงมณี", email:"warayut.p@first-techno.co.th"}
+];
+
+const palette = ["#06C755","#3B82F6","#F59E0B","#EF4444","#8B5CF6","#14B8A6","#EC4899","#6366F1"];
+function colorFor(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h);
+  return palette[Math.abs(h) % palette.length];
+}
+function initials(name) {
+  return name.trim().slice(0, 1).toUpperCase();
+}
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+let filter = 'all';
+function setFilter(f, el) {
+  filter = f;
+  document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function render() {
+  const q = document.getElementById('searchBox').value.trim().toLowerCase();
+  const grid = document.getElementById('grid');
+  let list = people.filter(p => {
+    if (filter === 'email' && !p.email) return false;
+    if (filter === 'noname' && p.full) return false;
+    if (!q) return true;
+    return (p.name + ' ' + (p.alias||'') + ' ' + p.phone + ' ' + p.full + ' ' + p.email).toLowerCase().includes(q);
+  });
+
+  if (list.length === 0) {
+    grid.innerHTML = '<div class="empty-state">ไม่พบรายการที่ค้นหา</div>';
+    return;
+  }
+
+  grid.innerHTML = list.map((p, idx) => {
+    const color = colorFor(p.name + p.id);
+    const fullHtml = p.full
+      ? `<div class="fullname">${escapeHtml(p.full)}</div>`
+      : `<div class="fullname missing">ไม่ได้ระบุชื่อเต็ม</div>`;
+    const aliasHtml = p.alias ? `<div class="alias">ชื่อในลิสต์: ${escapeHtml(p.alias)}</div>` : '';
+    const emailBtn = p.email
+      ? `<button class="act-btn email" onclick="copyText(this, '${p.email.replace(/'/g, "\\'")}')">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+           คัดลอกอีเมล
+           <span class="toast">คัดลอกแล้ว</span>
+         </button>`
+      : '';
+    return `
+      <div class="card">
+        <div class="avatar" style="background:${color}">${initials(p.name)}</div>
+        <div class="nm">${escapeHtml(p.name)}</div>
+        ${aliasHtml}
+        <div class="phone-chip">📞 ${p.phone}</div>
+        ${fullHtml}
+        <div class="actions">
+          <button class="act-btn" onclick="copyText(this, '${p.phone.replace(/'/g, "\\'")}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.36 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            คัดลอกเบอร์โทร
+            <span class="toast">คัดลอกแล้ว</span>
+          </button>
+          ${emailBtn}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function copyText(btn, text) {
+  const toast = btn.querySelector('.toast');
+  function flash() {
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1100);
+  }
+  try {
+    navigator.clipboard.writeText(text).then(flash).catch(() => fallbackCopy(text, flash));
+  } catch (e) {
+    fallbackCopy(text, flash);
+  }
+}
+function fallbackCopy(text, cb) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    cb();
+  } catch (e) { /* copy unsupported, ignore silently */ }
+}
+
+render();
+</script>
+</body>
+</html>
